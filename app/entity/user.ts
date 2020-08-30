@@ -13,4 +13,8 @@ export class User {
 
     @Column()
     email: string
+    
+    @Column({type: 'double',default: new Date().valueOf()})
+    createAt: number;
 }
+

@@ -22,6 +22,8 @@ createConnection()
         app.use(router.routes()).use(router.allowedMethods())
 
         app.listen(3000)
+        
+        console.log(`server is running: http://localhost:3000 `)
     })
     .catch((err: string) => {
         console.error('TypeORM connection error:', err)

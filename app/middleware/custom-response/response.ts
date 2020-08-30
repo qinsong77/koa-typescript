@@ -7,7 +7,7 @@ import { NotFoundException, UnAuthorizedException, ForbiddenException, ErrorHand
 const ok = (ctx: Context) => (data?: object | string ): void => { // 返回一个函数
     ctx.status = HTTP_CODE.OK
     ctx.body = {
-        code: 0,
+        code: 200,
         message: 'success',
         data
     }

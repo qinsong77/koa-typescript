@@ -12,7 +12,7 @@ export default class AuthController {
 
         const user = await userRepository
             .createQueryBuilder()
-            .where({ name: ctx.request.body.name })
+            .where({ name: ctx.request.body.username })
             .addSelect('User.password')
             .getOne()
         if (!user) {
@@ -29,7 +29,7 @@ export default class AuthController {
         const userRepository = getManager().getRepository(User)
 
         const newUser = new User()
-        newUser.name = ctx.request.body.name
+        newUser.name = ctx.request.body.username
         newUser.email = ctx.request.body.email
         newUser.password = await argon2.hash(ctx.request.body.password)
 

@@ -17,6 +17,7 @@ router.get('/users', UserController.listUsers)
 router.get('/users/:id', UserController.showUserDetail)
 router.put('/users/:id', UserController.updateUser)
 router.delete('/users/:id', UserController.deleteUser)
+router.post('/users/add_friend', UserController.sendAddFriendMessage)
 
 export default router
 

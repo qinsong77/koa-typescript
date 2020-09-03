@@ -14,10 +14,12 @@ router.post('/public/auth/register', AuthController.register)
 
 // users 相关的路由
 router.get('/users', UserController.listUsers)
+router.get('/users/friends/list', UserController.listFriend)
 router.get('/users/:id', UserController.showUserDetail)
 router.put('/users/:id', UserController.updateUser)
 router.delete('/users/:id', UserController.deleteUser)
 router.post('/users/add_friend', UserController.sendAddFriendMessage)
+router.post('/users/add_friend_agree', UserController.addFriendAgree)
 router.get('/users/msg/new_add', UserController.listAddMessage)
 
 

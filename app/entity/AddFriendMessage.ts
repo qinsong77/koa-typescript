@@ -1,16 +1,15 @@
 import { Column, ManyToOne, JoinColumn, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
-import { User } from './user'
 
 @Entity()
 export class AddFriendMessage {
     @PrimaryGeneratedColumn()
     id: number
     
-    @ManyToOne(type => User)
-    sender: User
+    @Column()
+    senderId: string
     
-    @ManyToOne(type => User)
-    responder: User
+    @Column()
+    responderId: string
     
     @Column({ default: ''})
     remarks: string
@@ -19,8 +18,8 @@ export class AddFriendMessage {
     isRead: boolean
     
     
-    @Column({ default: false })
-    isReject: boolean
+    @Column({ default: 0 })
+    status: number
     
     @CreateDateColumn()
     createdDate: Date

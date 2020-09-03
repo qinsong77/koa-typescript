@@ -3,6 +3,7 @@ import { getManager, getRepository } from 'typeorm'
 
 import { User } from '../entity/user'
 import { AddFriendMessage } from '../entity/AddFriendMessage'
+import { UserFriend } from '../entity/UserFriend'
 
 export default class UserController {
     public static async listUsers(ctx: Context) {
@@ -70,14 +71,14 @@ export default class UserController {
     
         const Repository = getRepository(AddFriendMessage)
         
-        const userRepository = getRepository(User)
-    
-        const sender = await getRepository(User).findOne(ctx.state.user.id)
         const responder = await getRepository(User).findOne(ctx.request.body.responder)
         
         const addMes = new AddFriendMessage()
-        if (sender) addMes.sender = sender
-        if (responder) addMes.responder = responder
+        
+        if (responder) {
+            addMes.responderId = responder.id
+        } else ctx.ErrorHandleRequest('好友不存在！')
+        addMes.senderId = ctx.state.user.id
         addMes.remarks = ctx.request.body.remarks
 
         const mes = await Repository.save(addMes)
@@ -99,8 +100,9 @@ export default class UserController {
             .createQueryBuilder("add_friend_message")
             // .leftJoinAndSelect(User, "user", "user.id = add_friend_message.id")
             // .leftJoinAndSelect("add_friend_message.sender", "sender", "sender.id = :id", { id: ctx.state.user.id })
-            .leftJoinAndSelect("add_friend_message.sender", "sender")
+            // .leftJoinAndSelect("add_friend_message.sender", "sender")
             .where("add_friend_message.responderId=:responderId", { responderId: ctx.state.user.id })
+            .leftJoinAndMapOne('add_friend_message.sender', User, 'user', 'add_friend_message.senderId=user.id')
             // .select(["user.id", "user.name"])
             // .leftJoinAndSelect("add_friend_message.responder", "responder")
             // .where("add_friend_message.responder: responder", { responder:responder })
@@ -109,6 +111,66 @@ export default class UserController {
             .getManyAndCount()
         
         const [data, total] = msg
+        data.forEach(v => {
+            // @ts-ignore
+            v.sender = {// @ts-ignore
+                name: v.sender.name, // @ts-ignore
+                id: v.sender.id,// @ts-ignore
+                avatar: v.sender.avatar
+            }
+        })
+        ctx.ok({
+            data,
+            total,
+            current,
+            pageSize
+        })
+    }
+    
+    
+    public static async addFriendAgree(ctx: Context) {
+        
+        const re = getRepository(UserFriend)
+        
+        const msg = await getRepository(AddFriendMessage).findOne(ctx.request.body.msgId)
+        
+        
+       if (msg) {
+           // const sender = await userRepository.findOne(msg.senderId)
+           // const responder = await userRepository.findOne(msg.responderId)
+           const userFriend = new UserFriend()
+           userFriend.friendId = msg.senderId
+           userFriend.userId = msg.responderId
+    
+           const userFriend2 = new UserFriend()
+           userFriend2.friendId = msg.responderId
+           userFriend2.userId = msg.senderId
+           await re.save(userFriend)
+           await re.save(userFriend2)
+           
+           msg.status = 1
+           
+           await getRepository(AddFriendMessage).save(msg)
+           
+           ctx.ok('已添加好友')
+       } else {
+           ctx.ErrorHandleRequest('添加失败！')
+       }
+    }
+    
+    public static async listFriend (ctx: Context) {
+        const { current = 1, pageSize = 100, name = '' } = ctx.request.query
+        const skip = (current - 1) * pageSize
+        const users = await getRepository(UserFriend)
+            .createQueryBuilder("user_friend")
+            .where("user_friend.userId=:userId", { userId: ctx.state.user.id })
+            .leftJoinAndMapOne('user_friend.friend', User, 'user', 'user_friend.userId=user.id')
+            .skip(skip)
+            .take(pageSize)
+            .getManyAndCount()
+        
+        
+        const [data, total] = users
         ctx.ok({
             data,
             total,

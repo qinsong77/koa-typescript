@@ -18,7 +18,8 @@ export default class AuthController {
         if (!user) {
             ctx.NotFoundException('用户名不存在')
         } else if (await argon2.verify(user.password, ctx.request.body.password)) {
-            ctx.ok({ token: jwt.sign({ id: user.id }, JWT_SECRET), ctx: ctx })
+            delete user.password
+            ctx.ok({ token: jwt.sign({ id: user.id }, JWT_SECRET), data: user })
         } else {
             ctx.ErrorHandleRequest('密码错误')
         }

@@ -1,15 +1,16 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
+import { Column, ManyToOne, JoinColumn, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
+import { User } from './user'
 
 @Entity()
 export class AddFriendMessage {
     @PrimaryGeneratedColumn()
     id: number
     
-    @Column()
-    sender: string
+    @ManyToOne(type => User)
+    sender: User
     
-    @Column()
-    responder: string
+    @ManyToOne(type => User)
+    responder: User
     
     @Column({ default: ''})
     remarks: string

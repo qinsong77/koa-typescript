@@ -1,21 +1,24 @@
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
 
 @Entity()
-export class User {
-    @PrimaryGeneratedColumn('uuid')
-    id: string
+export class FriendMessage {
+    @PrimaryGeneratedColumn()
+    id: number
     
     @Column()
-    name: string
-    
-    @Column({ select: false })
-    password: string
+    userId: string
     
     @Column()
-    email: string
+    friendId: string
     
-    @Column({ default: '/avatar/default.jpg'})
-    avatar: string
+    @Column()
+    content: string;
+    
+    @Column({ default: 0})
+    messageType: Number;
+    
+    @Column()
+    time: Date;
     
     @CreateDateColumn()
     createdDate: Date
@@ -23,3 +26,4 @@ export class User {
     @UpdateDateColumn()
     updatedDate: Date
 }
+

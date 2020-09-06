@@ -4,6 +4,9 @@ import { getManager, getRepository } from 'typeorm'
 import { User } from '../entity/user'
 import { AddFriendMessage } from '../entity/AddFriendMessage'
 import { UserFriend } from '../entity/UserFriend'
+import { FriendMessage } from '../entity/FriendMessage'
+import fs from 'fs'
+import path from 'path'
 
 export default class UserController {
     public static async listUsers(ctx: Context) {
@@ -88,12 +91,9 @@ export default class UserController {
         } else ctx.ErrorHandleRequest('发送好友请求失败')
     }
     
-    public static async listAddMessage(ctx: Context) {
-    
-        const responder = await getRepository(User).findOne(ctx.state.user.id)
+    public static async listAddFriendMessage(ctx: Context) {
         
         const { current = 1, pageSize = 10} = ctx.request.query
-        console.log(ctx.request.query)
         const skip = (current - 1) * pageSize
         const msg = await getManager()
             .getRepository(AddFriendMessage)
@@ -164,7 +164,7 @@ export default class UserController {
         const users = await getRepository(UserFriend)
             .createQueryBuilder("user_friend")
             .where("user_friend.userId=:userId", { userId: ctx.state.user.id })
-            .leftJoinAndMapOne('user_friend.friend', User, 'user', 'user_friend.userId=user.id')
+            .leftJoinAndMapOne('user_friend.friend', User, 'user', 'user_friend.friendId=user.id')
             .skip(skip)
             .take(pageSize)
             .getManyAndCount()
@@ -177,5 +177,34 @@ export default class UserController {
             current,
             pageSize
         })
+    }
+    
+    public static async listHistoryMessages (ctx: Context) {
+        const { current = 1, pageSize = 100, name = '' } = ctx.request.query
+        const skip = (current - 1) * pageSize
+        const users = await getRepository(FriendMessage)
+            .createQueryBuilder("friend_message")
+            .where("friend_message.userId=:userId", { userId: ctx.state.user.id })
+            .orWhere("friend_message.friendId=:userId", { userId: ctx.state.user.id })
+            .orderBy("friend_message.createdDate", 'DESC')
+            .skip(skip)
+            .take(pageSize)
+            .getManyAndCount()
+        
+        
+        const [data, total] = users
+        ctx.ok({
+            data,
+            total,
+            current,
+            pageSize
+        })
+    }
+    
+    public static async uploadFile(ctx: Context) {
+        // @ts-ignore
+        const file = ctx.request.files.file
+        const avatar = '/avatar/' + file.path.split('\\')[file.path.split('\\').length -1]
+        ctx.ok(avatar)
     }
 }

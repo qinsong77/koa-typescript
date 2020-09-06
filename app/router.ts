@@ -3,6 +3,7 @@ import AuthController from './controllers/auth'
 import UserController from './controllers/user'
 import { DefaultState, Context } from 'koa'
 
+
 // 添加Router泛型类型
 const router = new Router<DefaultState, Context>({
     prefix: '/api'
@@ -13,14 +14,18 @@ router.post('/public/auth/login', AuthController.login)
 router.post('/public/auth/register', AuthController.register)
 
 // users 相关的路由
-router.get('/users', UserController.listUsers)
-router.get('/users/friends/list', UserController.listFriend)
-router.get('/users/:id', UserController.showUserDetail)
-router.put('/users/:id', UserController.updateUser)
-router.delete('/users/:id', UserController.deleteUser)
-router.post('/users/add_friend', UserController.sendAddFriendMessage)
-router.post('/users/add_friend_agree', UserController.addFriendAgree)
-router.get('/users/msg/new_add', UserController.listAddMessage)
+router.get('/users/list', UserController.listUsers)
+
+
+router.post('/user/uploadFile', UserController.uploadFile)
+router.get('/user/:id', UserController.showUserDetail)
+router.put('/user/:id', UserController.updateUser)
+router.delete('/user/:id', UserController.deleteUser)
+router.post('/user/friend', UserController.sendAddFriendMessage)
+router.get('/user/friends/list', UserController.listFriend)
+router.post('/user/add_friend_agree', UserController.addFriendAgree)
+router.get('/user/add_friend_message/list', UserController.listAddFriendMessage)
+router.get('/user/history_message/list', UserController.listHistoryMessages)
 
 
 export default router

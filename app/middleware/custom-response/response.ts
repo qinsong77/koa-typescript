@@ -31,6 +31,8 @@ const KoaCustomResponse = () => async (ctx: Context, next: Next) => {
     try {
         await next()
     } catch (err) {
+        console.log(`${ctx.request.url} has error:`)
+        console.log('------------------------------')
         console.log(err)
         if (err.name === 'UnauthorizedError') {
             err.message = '请登录'

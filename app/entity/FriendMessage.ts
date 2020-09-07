@@ -20,6 +20,9 @@ export class FriendMessage {
     @Column()
     time: Date;
     
+    @Column({ default: true })
+    isRead: Boolean;
+    
     @CreateDateColumn()
     createdDate: Date
     

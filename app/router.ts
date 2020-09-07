@@ -1,6 +1,7 @@
 import Router from '@koa/router'
 import AuthController from './controllers/auth'
 import UserController from './controllers/user'
+import ChatController from './controllers/chat'
 import { DefaultState, Context } from 'koa'
 
 
@@ -14,18 +15,22 @@ router.post('/public/auth/login', AuthController.login)
 router.post('/public/auth/register', AuthController.register)
 
 // users 相关的路由
-router.get('/users/list', UserController.listUsers)
+router.get('/users/list', UserController.UsersList) // 获取所以用户
 
 
-router.post('/user/uploadFile', UserController.uploadFile)
-router.get('/user/:id', UserController.showUserDetail)
-router.put('/user/:id', UserController.updateUser)
-router.delete('/user/:id', UserController.deleteUser)
-router.post('/user/friend', UserController.sendAddFriendMessage)
-router.get('/user/friends/list', UserController.listFriend)
-router.post('/user/add_friend_agree', UserController.addFriendAgree)
-router.get('/user/add_friend_message/list', UserController.listAddFriendMessage)
-router.get('/user/history_message/list', UserController.listHistoryMessages)
+router.post('/user/uploadFile', UserController.uploadFile) // 上传文件
+router.get('/user/:id', UserController.getUserDetail) // 获取详情
+router.put('/user/:id', UserController.updateUser) // 用户更改
+router.delete('/user/:id', UserController.deleteUser) // 删除
+
+// 聊天
+router.get('/chat/canAddUserList', ChatController.canAddUserList)
+router.get('/chat/listFriends', ChatController.listFriend)
+router.get('/chat/listAddFriendMessage', ChatController.listAddFriendMessage)
+router.get('/chat/listHistoryMessages', ChatController.listHistoryMessages)
+router.post('/chat/sendAddFriendMessage', ChatController.sendAddFriendMessage)
+router.post('/chat/agreeAddFriend', ChatController.agreeAddFriend)
+
 
 
 export default router

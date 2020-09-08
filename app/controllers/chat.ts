@@ -22,13 +22,15 @@ export default class ChatController {
         const msg = await getManager()
             .getRepository(User)
             .createQueryBuilder('user')
-            .whereInIds(friendIds)
+            .innerJoin(UserFriend, 'user_friend',"user_friend.userId = :userId",{ userId: ctx.state.user.id })
+            .where("user_friend.friendId != user.id")
+            // .where("user_friend.userId = null")
             .andWhere("user.id != :id", { id: ctx.state.user.id })// 排除自己
             .andWhere('user.name LIKE :param')
             .setParameters({
                 param: '%' + name + '%'
             })
-            .select(["user.id", "user.name"])
+            // .select(["user.id", "user.name"])
             .skip(skip)
             .take(pageSize)
             .getManyAndCount()
@@ -141,6 +143,7 @@ export default class ChatController {
     public static async listFriend(ctx: Context) {
         const { current = 1, pageSize = 100, name = '' } = ctx.request.query
         const skip = (current - 1) * pageSize
+        /*
         const users = await getRepository(UserFriend)
             .createQueryBuilder('user_friend')
             .where('user_friend.userId=:userId', { userId: ctx.state.user.id })
@@ -148,8 +151,15 @@ export default class ChatController {
             .skip(skip)
             .take(pageSize)
             .getManyAndCount()
-        
-        
+        */
+        const users = await getRepository(User)
+            .createQueryBuilder('user')
+            .innerJoin(UserFriend, 'user_friend', "user_friend.userId = user.id")
+            .andWhere("user_friend.friendId = :id", { id: ctx.state.user.id })
+            .select(["user.id", "user.name","user.avatar"])
+            .skip(skip)
+            .take(pageSize)
+            .getManyAndCount()
         const [data, total] = users
         ctx.ok({
             data,

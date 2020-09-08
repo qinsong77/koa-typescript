@@ -1,4 +1,4 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, Entity, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm'
 
 @Entity()
 export class UserFriend {
@@ -10,5 +10,11 @@ export class UserFriend {
     
     @Column()
     userId: string
+    
+    @CreateDateColumn()
+    createdDate: Date
+    
+    @UpdateDateColumn()
+    updatedDate: Date
 }
 

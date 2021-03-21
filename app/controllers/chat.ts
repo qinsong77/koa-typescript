@@ -22,28 +22,30 @@ export default class ChatController {
         const msg = await getManager()
             .getRepository(User)
             .createQueryBuilder('user')
-            .innerJoin(UserFriend, 'user_friend',"user_friend.userId = :userId",{ userId: ctx.state.user.id })
-            .where("user_friend.friendId != user.id")
-            // .where("user_friend.userId = null")
-            .andWhere("user.id != :id", { id: ctx.state.user.id })// 排除自己
+            // .leftJoin(UserFriend, 'user_friend',"user_friend.userId = user.Id")
+            // .where("user_friend.userId = :id", { id: ctx.state.user.id })
+            // .leftJoinAndSelect(UserFriend, 'user_friend',"user_friend.userId = :id", { id: ctx.state.user.id })
+            .where("user.id != :id", { id: ctx.state.user.id })// 排除自己
+            // .andWhere("(user_friend.friendId != :id OR user_friend.friendId IS NULL)", { id: ctx.state.user.id })
+            .andWhere(((qb: any) => {
+                const subQuery = qb
+                    .subQuery()
+                    .select("user_friend.friendId")
+                    .from(UserFriend, 'user_friend')
+                    .where("user_friend.userId = :userId", { userId: ctx.state.user.id })
+                    .getQuery();
+                return 'user.id NOT IN ' + subQuery;
+            }))
             .andWhere('user.name LIKE :param')
             .setParameters({
                 param: '%' + name + '%'
             })
-            // .select(["user.id", "user.name"])
+            .select(["user.id", "user.name"])
             .skip(skip)
             .take(pageSize)
             .getManyAndCount()
         
         const [data, total] = msg
-        // data.forEach(v => {
-        //     // @ts-ignore
-        //     v.sender = {// @ts-ignore
-        //         name: v.sender.name, // @ts-ignore
-        //         id: v.sender.id,// @ts-ignore
-        //         avatar: v.sender.avatar
-        //     }
-        // })
         ctx.ok({
             data,
             total,

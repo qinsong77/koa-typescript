@@ -1,6 +1,7 @@
 import { Server } from 'socket.io'
 import { FriendMessage } from '../entity/FriendMessage'
 import { getRepository } from 'typeorm'
+import { AddFriendMessage } from '../entity/AddFriendMessage'
 let MAP = {};
 interface Msg {
     type: number,
@@ -8,6 +9,10 @@ interface Msg {
     friendId: string,
     time: Date,
     uid?: string
+}
+interface AddFriendData {
+    responder: string,
+    remarks: string
 }
 function socket(io: Server) {
     //两人聊天
@@ -42,6 +47,17 @@ function socket(io: Server) {
             } catch (err) {
                 console.error(err)
             }
+        })
+        
+        socket.on('add_friend', async (data: AddFriendData) => {
+            const Repository = getRepository(AddFriendMessage)
+            const addMes = new AddFriendMessage()
+            // @ts-ignore
+            addMes.senderId = socket.user.id
+            addMes.responderId = data.responder
+            addMes.remarks = data.remarks
+            const mes = await Repository.save(addMes)
+            socket.to(addMes.responderId).emit('new_add_msg', mes);
         })
     })
     
